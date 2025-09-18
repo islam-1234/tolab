@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلاب م/ حنان عبدالغني - مادة العلوم</title>
+    <title>طلاب م/ حنان عبدالغني - مادة اللغة الإنجليزية</title>
     <style>
         * {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -29,6 +29,7 @@
             max-width: 500px;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
         
         h1 {
@@ -110,9 +111,14 @@
             margin-bottom: 15px;
         }
         
-        .submit-btn:hover {
+        .submit-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .submit-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
         }
         
         .submit-btn:active {
@@ -133,6 +139,10 @@
             left: 50%;
             transform: translateX(-50%);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toast.error {
+            background-color: #ff4d4d;
         }
         
         .toast.show {
@@ -170,18 +180,63 @@
             font-weight: bold;
             color: #6a11cb;
         }
+        
+        .loading {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6a11cb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .dashboard-link {
+            display: block;
+            margin-top: 20px;
+            color: #2575fc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .dashboard-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+        
         <h1>طلاب م/ حنان عبدالغني</h1>
-        <h2>مادة العلوم</h2>
+        <h2>مادة اللغة الإنجليزية</h2>
         
         <div class="already-registered" id="alreadyRegistered">
             <p>لقد قمت بالتسجيل مسبقاً</p>
             <p>اسم الطالب: <span class="registered-info" id="registeredName"></span></p>
             <p>رقم الهاتف: <span class="registered-info" id="registeredPhone"></span></p>
             <p>المرحلة: <span class="registered-info" id="registeredGrade"></span></p>
+            <p>سيتم إغلاق هذه الصفحة تلقائياً خلال <span id="countdown">10</span> ثوانٍ</p>
         </div>
         
         <form id="studentForm">
@@ -211,9 +266,11 @@
             
             <button type="submit" class="submit-btn" id="submitBtn">تسجيل البيانات</button>
         </form>
+        
+        <a href="dashboard.html" class="dashboard-link">الدخول إلى لوحة التحكم (للمعلم فقط)</a>
     </div>
     
-    <div id="toast" class="toast">تم حفظ البيانات بنجاح! شكراً لك.</div>
+    <div id="toast" class="toast"></div>
 
     <!-- Firebase App (core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -249,9 +306,12 @@
         const registeredName = document.getElementById('registeredName');
         const registeredPhone = document.getElementById('registeredPhone');
         const registeredGrade = document.getElementById('registeredGrade');
+        const loading = document.getElementById('loading');
+        const countdownElement = document.getElementById('countdown');
         
         let selectedGrade = '';
         let existingStudents = [];
+        let countdownInterval;
         
         // Check if student is already registered
         function checkIfRegistered() {
@@ -263,12 +323,25 @@
                 registeredName.textContent = student.name;
                 registeredPhone.textContent = student.phone;
                 registeredGrade.textContent = student.grade;
+                
+                // بدء العد التنازلي لإغلاق الصفحة
+                let countdown = 10;
+                countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        window.close(); // إغلاق النافذة
+                    }
+                }, 1000);
             }
         }
         
         // Load existing students to check for duplicates
         async function loadExistingStudents() {
             try {
+                loading.style.display = 'flex';
                 const snapshot = await db.collection('students').get();
                 existingStudents = [];
                 
@@ -279,8 +352,12 @@
                         phone: studentData.phone
                     });
                 });
+                
+                loading.style.display = 'none';
             } catch (error) {
                 console.error('Error loading students: ', error);
+                loading.style.display = 'none';
+                showToast('حدث خطأ في تحميل البيانات', true);
             }
         }
         
@@ -356,6 +433,8 @@
             const phoneNumber = phoneNumberInput.value;
             
             try {
+                loading.style.display = 'flex';
+                
                 // Add student data to Firestore
                 await db.collection('students').add({
                     name: studentName,
@@ -387,9 +466,23 @@
                 registeredPhone.textContent = phoneNumber;
                 registeredGrade.textContent = selectedGrade;
                 
+                // بدء العد التنازلي لإغلاق الصفحة
+                let countdown = 10;
+                countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        window.close(); // إغلاق النافذة
+                    }
+                }, 1000);
+                
             } catch (error) {
                 console.error('Error adding document: ', error);
                 showToast('حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.', true);
+            } finally {
+                loading.style.display = 'none';
             }
         });
         
@@ -397,11 +490,10 @@
         function showToast(message, isError = false) {
             toast.textContent = message;
             if (isError) {
-                toast.style.backgroundColor = '#ff4d4d';
+                toast.className = 'toast error show';
             } else {
-                toast.style.backgroundColor = '#4CAF50';
+                toast.className = 'toast show';
             }
-            toast.className = 'toast show';
             
             setTimeout(() => {
                 toast.className = toast.className.replace('show', '');
