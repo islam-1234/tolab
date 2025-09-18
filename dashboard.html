@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - طلاب م/ حنان عبدالغني</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        * {
+            font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        h2 {
+            font-size: 20px;
+            margin: 25px 0 15px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 8px;
+        }
+        
+        h3 {
+            font-size: 18px;
+            margin: 20px 0 15px;
+            color: var(--secondary);
+        }
+        
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        
+        .filter-item label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .filter-item select, .filter-item input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .students-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .students-table th,
+        .students-table td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .students-table th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .students-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: all 0.3s;
+        }
+        
+        .edit-btn {
+            background-color: var(--info);
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .save-btn {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .cancel-btn {
+            background-color: #9e9e9e;
+            color: white;
+        }
+        
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .add-student-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-title {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .submit-form-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--success);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        
+        .toast.error {
+            background-color: var(--danger);
+        }
+        
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+        
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-item {
+                width: 100%;
+            }
+            
+            .students-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>لوحة تحكم طلاب م/ حنان عبدالغني - مادة العلوم</h1>
+        </header>
+        
+        <div class="add-student-form">
+            <h2 class="form-title">إضافة طالب جديد</h2>
+            <form id="addStudentForm">
+                <div class="form-group">
+                    <label for="newStudentName">اسم الطالب</label>
+                    <input type="text" id="newStudentName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newPhoneNumber">رقم الهاتف / رقم ولي الأمر</label>
+                    <input type="text" id="newPhoneNumber" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newGrade">المرحلة الدراسية</label>
+                    <select id="newGrade" required>
+                        <option value="">اختر المرحلة</option>
+                        <option value="الرابع الابتدائي">الرابع الابتدائي</option>
+                        <option value="الخامس الابتدائي">الخامس الابتدائي</option>
+                        <option value="السادس الابتدائي">السادس الابتدائي</option>
+                        <option value="الأول الإعدادي">الأول الإعدادي</option>
+                        <option value="الثاني الإعدادي">الثاني الإعدادي</option>
+                        <option value="الثالث الإعدادي">الثالث الإعدادي</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="submit-form-btn">إضافة الطالب</button>
+            </form>
+        </div>
+        
+        <div class="filters">
+            <input type="text" class="filter-item" placeholder="ابحث باسم الطالب أو رقم الهاتف..." id="searchInput">
+            
+            <select class="filter-item" id="gradeFilter">
+                <option value="">جميع المراحل</option>
+                <option value="الرابع الابتدائي">الرابع الابتدائي</option>
+                <option value="الخامس الابتدائي">الخامس الابتدائي</option>
+                <option value="السادس الابتدائي">السادس الابتدائي</option>
+                <option value="الأول الإعدادي">الأول الإعدادي</option>
+                <option value="الثاني الإعدادي">الثاني الإعدادي</option>
+                <option value="الثالث الإعدادي">الثالث الإعدادي</option>
+            </select>
+        </div>
+        
+        <table class="students-table">
+            <thead>
+                <tr>
+                    <th>اسم الطالب</th>
+                    <th>رقم الهاتف</th>
+                    <th>المرحلة</th>
+                    <th>تاريخ التسجيل</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="studentsList">
+                <!-- سيتم ملء هذا القسم بالبيانات من Firebase -->
+            </tbody>
+        </table>
+    </div>
+    
+    <div id="toast" class="toast"></div>
+
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB27lyphN9YxgB4eFwuKWi0ghjuAutpu8o",
+            authDomain: "manssa-oloom1352007.firebaseapp.com",
+            projectId: "manssa-oloom1352007",
+            storageBucket: "manssa-oloom1352007.firebasestorage.app",
+            messagingSenderId: "191595591961",
+            appId: "1:191595591961:web:79ff9bbb52cc08cb862d88",
+            measurementId: "G-B57GFGNW3B"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // DOM elements
+        const studentsList = document.getElementById('studentsList');
+        const addStudentForm = document.getElementById('addStudentForm');
+        const searchInput = document.getElementById('searchInput');
+        const gradeFilter = document.getElementById('gradeFilter');
+        const toast = document.getElementById('toast');
+        
+        let students = [];
+        let editMode = {
+            active: false,
+            id: null
+        };
+        
+        // Load students data
+        function loadStudents() {
+            db.collection('students').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+                students = [];
+                studentsList.innerHTML = '';
+                
+                snapshot.forEach(doc => {
+                    const student = {
+                        id: doc.id,
+                        ...doc.data()
+                    };
+                    students.push(student);
+                    
+                    // Format timestamp
+                    let formattedDate = 'غير محدد';
+                    if (student.timestamp) {
+                        const date = student.timestamp.toDate();
+                        formattedDate = date.toLocaleDateString('ar-EG');
+                    }
+                    
+                    // Create row for student
+                    const row = document.createElement('tr');
+                    
+                    if (editMode.active && editMode.id === doc.id) {
+                        // Edit mode
+                        row.innerHTML = `
+                            <td><input type="text" value="${student.name}" class="edit-name"></td>
+                            <td><input type="text" value="${student.phone}" class="edit-phone"></td>
+                            <td>
+                                <select class="edit-grade">
+                                    <option value="الرابع الابتدائي" ${student.grade === 'الرابع الابتدائي' ? 'selected' : ''}>الرابع الابتدائي</option>
+                                    <option value="الخامس الابتدائي" ${student.grade === 'الخامس الابتدائي' ? 'selected' : ''}>الخامس الابتدائي</option>
+                                    <option value="السادس الابتدائي" ${student.grade === 'السادس الابتدائي' ? 'selected' : ''}>السادس الابتدائي</option>
+                                    <option value="الأول الإعدادي" ${student.grade === 'الأول الإعدادي' ? 'selected' : ''}>الأول الإعدادي</option>
+                                    <option value="الثاني الإعدادي" ${student.grade === 'الثاني الإعدادي' ? 'selected' : ''}>الثاني الإعدادي</option>
+                                    <option value="الثالث الإعدادي" ${student.grade === 'الثالث الإعدادي' ? 'selected' : ''}>الثالث الإعدادي</option>
+                                </select>
+                            </td>
+                            <td>${formattedDate}</td>
+                            <td>
+                                <button class="action-btn save-btn" onclick="saveStudent('${doc.id}')">حفظ</button>
+                                <button class="action-btn cancel-btn" onclick="cancelEdit()">إلغاء</button>
+                            </td>
+                        `;
+                    } else {
+                        // View mode
+                        row.innerHTML = `
+                            <td>${student.name}</td>
+                            <td>${student.phone}</td>
+                            <td>${student.grade}</td>
+                            <td>${formattedDate}</td>
+                            <td>
+                                <button class="action-btn edit-btn" onclick="enableEdit('${doc.id}')">تعديل</button>
+                                <button class="action-btn delete-btn" onclick="deleteStudent('${doc.id}', '${student.name}')">حذف</button>
+                            </td>
+                        `;
+                    }
+                    
+                    studentsList.appendChild(row);
+                });
+                
+                // Apply filters if any
+                applyFilters();
+            });
+        }
+        
+        // Add new student
+        addStudentForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('newStudentName').value;
+            const phone = document.getElementById('newPhoneNumber').value;
+            const grade = document.getElementById('newGrade').value;
+            
+            try {
+                await db.collection('students').add({
+                    name: name,
+                    phone: phone,
+                    grade: grade,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast('تم إضافة الطالب بنجاح');
+                addStudentForm.reset();
+            } catch (error) {
+                console.error('Error adding student: ', error);
+                showToast('حدث خطأ أثناء إضافة الطالب', true);
+            }
+        });
+        
+        // Enable edit mode
+        function enableEdit(studentId) {
+            editMode.active = true;
+            editMode.id = studentId;
+            loadStudents();
+        }
+        
+        // Cancel edit mode
+        function cancelEdit() {
+            editMode.active = false;
+            editMode.id = null;
+            loadStudents();
+        }
+        
+        // Save edited student
+        async function saveStudent(studentId) {
+            const row = document.querySelector(`tr:has(button[onclick="saveStudent('${studentId}')"])`);
+            const name = row.querySelector('.edit-name').value;
+            const phone = row.querySelector('.edit-phone').value;
+            const grade = row.querySelector('.edit-grade').value;
+            
+            try {
+                await db.collection('students').doc(studentId).update({
+                    name: name,
+                    phone: phone,
+                    grade: grade
+                });
+                
+                showToast('تم تحديث بيانات الطالب بنجاح');
+                editMode.active = false;
+                editMode.id = null;
+                loadStudents();
+            } catch (error) {
+                console.error('Error updating student: ', error);
+                showToast('حدث خطأ أثناء تحديث البيانات', true);
+            }
+        }
+        
+        // Delete student
+        async function deleteStudent(studentId, studentName) {
+            if (confirm(`هل أنت متأكد من حذف الطالب ${studentName}؟`)) {
+                try {
+                    await db.collection('students').doc(studentId).delete();
+                    showToast('تم حذف الطالب بنجاح');
+                } catch (error) {
+                    console.error('Error deleting student: ', error);
+                    showToast('حدث خطأ أثناء حذف الطالب', true);
+                }
+            }
+        }
+        
+        // Search and filter functionality
+        searchInput.addEventListener('input', applyFilters);
+        gradeFilter.addEventListener('change', applyFilters);
+        
+        function applyFilters() {
+            const searchText = searchInput.value.toLowerCase();
+            const selectedGrade = gradeFilter.value;
+            
+            const rows = studentsList.querySelectorAll('tr');
+            
+            rows.forEach((row, index) => {
+                if (index === 0) return; // Skip header row
+                
+                const name = row.cells[0].textContent.toLowerCase();
+                const phone = row.cells[1].textContent.toLowerCase();
+                const grade = row.cells[2].textContent;
+                
+                const matchesSearch = name.includes(searchText) || phone.includes(searchText);
+                const matchesGrade = selectedGrade === '' || grade === selectedGrade;
+                
+                if (matchesSearch && matchesGrade) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Show toast notification
+        function showToast(message, isError = false) {
+            toast.textContent = message;
+            toast.className = isError ? 'toast error show' : 'toast show';
+            
+            setTimeout(() => {
+                toast.className = toast.className.replace('show', '');
+            }, 3000);
+        }
+        
+        // Initial load
+        loadStudents();
+    </script>
+</body>
+</html>
