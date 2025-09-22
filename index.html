@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلاب م/ حنان عبدالغني - مادة اللغة الإنجليزية</title>
+    <title>طلاب م/ حنان عبدالغني</title>
     <style>
         * {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -229,7 +229,7 @@
         </div>
         
         <h1>طلاب م/ حنان عبدالغني</h1>
-        <h2>مادة اللغة الإنجليزية</h2>
+        <h2>مادة اللغة الانجليزية</h2>
         
         <div class="already-registered" id="alreadyRegistered">
             <p>لقد قمت بالتسجيل مسبقاً</p>
@@ -267,7 +267,7 @@
             <button type="submit" class="submit-btn" id="submitBtn">تسجيل البيانات</button>
         </form>
         
-        <a href="dashboard.html" class="dashboard-link">الدخول إلى لوحة التحكم (للمعلم فقط)</a>
+        
     </div>
     
     <div id="toast" class="toast"></div>
@@ -278,15 +278,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration - استخدام الإعدادات الأصلية
         const firebaseConfig = {
-            apiKey: "AIzaSyB27lyphN9YxgB4eFwuKWi0ghjuAutpu8o",
-            authDomain: "manssa-oloom1352007.firebaseapp.com",
-            projectId: "manssa-oloom1352007",
-            storageBucket: "manssa-oloom1352007.firebasestorage.app",
-            messagingSenderId: "191595591961",
-            appId: "1:191595591961:web:79ff9bbb52cc08cb862d88",
-            measurementId: "G-B57GFGNW3B"
+            apiKey: "AIzaSyDEvdGB2dHbB9k0mvAa14VFaKvjSfooB20",
+            authDomain: "manssat-science.firebaseapp.com",
+            databaseURL: "https://manssat-science-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "manssat-science",
+            storageBucket: "manssat-science.firebasestorage.app",
+            messagingSenderId: "22539678455",
+            appId: "1:22539678455:web:bd8cdc9ecd950a2b53d9f2",
+            measurementId: "G-1DMLG6CRP5"
         };
 
         // Initialize Firebase
@@ -315,7 +316,7 @@
         
         // Check if student is already registered
         function checkIfRegistered() {
-            const registeredStudent = localStorage.getItem('registeredStudent_hannan');
+            const registeredStudent = localStorage.getItem('registeredStudent_ismail');
             if (registeredStudent) {
                 const student = JSON.parse(registeredStudent);
                 alreadyRegistered.style.display = 'block';
@@ -444,7 +445,7 @@
                 });
                 
                 // Save to local storage to prevent re-registration
-                localStorage.setItem('registeredStudent_hannan', JSON.stringify({
+                localStorage.setItem('registeredStudent_ismail', JSON.stringify({
                     name: studentName,
                     phone: phoneNumber,
                     grade: selectedGrade
